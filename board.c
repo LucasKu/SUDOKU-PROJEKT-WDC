@@ -36,6 +36,15 @@ void board_init()
     board->grid1 = grid1;
     board->grid2 = grid2;
 
+    int **arr = (int**)malloc(9 * sizeof(int*));
+    for( int i=0; i<9; i++ )
+        arr[i] = (int*)malloc(9 * sizeof(int));
+    for( int i=0; i<9; i++ )
+        for( int j=0; j<9; j++ )
+            arr[i][j]=0;
+
+    board->arr = arr;
+
     for( int i=0; i<9; i++ )
         for( int j=0; j<9; j++ )
         {
