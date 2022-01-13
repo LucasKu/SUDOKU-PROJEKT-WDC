@@ -11,9 +11,9 @@ void click_on_board( GtkWidget *widget, gpointer data )
     GtkWidget *image1 = gtk_image_new_from_pixbuf( Hover );
     GtkWidget *image2 = gtk_image_new_from_pixbuf( Empty );
 
-    gtk_button_set_image( GTK_BUTTON(widget), image1 );
     if( board->widget != NULL  )    gtk_button_set_image( GTK_BUTTON(board->widget), image2 );
     board->widget = widget;
+    gtk_button_set_image( GTK_BUTTON(widget), image1 );
 
     for( int i=0; i<9; i++ )
         for( int j=0; j<9; j++ )
