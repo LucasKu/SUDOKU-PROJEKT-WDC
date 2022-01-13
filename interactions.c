@@ -11,12 +11,18 @@ void click_on_board( GtkWidget *widget, gpointer data )
     GtkWidget *image1 = gtk_image_new_from_pixbuf( Hover );
     GtkWidget *image2 = gtk_image_new_from_pixbuf( Empty );
 
-    if( board->widget != NULL  )    gtk_button_set_image( GTK_BUTTON(board->widget), image2 );
-    board->widget = widget;
-    gtk_button_set_image( GTK_BUTTON(widget), image1 );
-
     struct WidPos position = get_pos_on_board( widget, board );
     g_print("row: %d col: %d\n", position.y, position.x);
+
+    board->arr[position.y][position.x] = 0;
+
+    struct WidPos prev_pos = get_pos_on_board( board->widget, board );
+    int x = prev_pos.x;
+    int y = prev_pos.y;
+
+    if( board->widget != NULL && board->arr[y][x] < 1  )    gtk_button_set_image( GTK_BUTTON(board->widget), image2 );
+    board->widget = widget;
+    gtk_button_set_image( GTK_BUTTON(widget), image1 );
 
 }
 
@@ -48,6 +54,12 @@ void click_on_number( GtkWidget *widget, gpointer data )
     else if( i == 6 )    Number = Seven;
     else if( i == 7 )    Number = Eight;
     else if( i == 8 )    Number = Nine;
+
+    struct WidPos pos_board = get_pos_on_board( board->widget, board );
+    int x = pos_board.x;
+    int y = pos_board.y;
+
+    board->arr[y][x] = i+1;
 
     GtkWidget *image = gtk_image_new_from_pixbuf( Number );
     gtk_button_set_image( GTK_BUTTON(board->widget), image );
