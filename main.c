@@ -1,4 +1,5 @@
 #include<gtk/gtk.h>
+#include<stdbool.h>
 #include "functions.h"
 
 int main(int argc, char **argv)

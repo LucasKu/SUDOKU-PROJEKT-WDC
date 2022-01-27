@@ -1,4 +1,5 @@
 #include<gtk/gtk.h>
+#include<stdbool.h>
 #include "functions.h"
 
 struct WidPos get_pos_on_board( GtkWidget *widget, struct BoardInfo *board )
