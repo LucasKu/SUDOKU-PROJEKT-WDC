@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 
     gtk_init(&argc, &argv);
 
-    board_init();
+    menu_init();
 
     gtk_main();
 

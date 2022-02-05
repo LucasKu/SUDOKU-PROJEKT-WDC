@@ -3,8 +3,10 @@
 #include<stdbool.h>
 #include "functions.h"
 
-void board_init()
+void board_init( GtkWidget *widget, gpointer data )
 {
+
+    (void)widget;
 
     GtkWidget *window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     GtkWidget *grid = gtk_grid_new();
@@ -17,7 +19,6 @@ void board_init()
     gtk_window_set_position( GTK_WINDOW(window), GTK_WIN_POS_CENTER_ALWAYS );
     gtk_window_set_title( GTK_WINDOW(window), "SUDOKU" );
     gtk_window_set_default_size( GTK_WINDOW(window), 598, 750 );
-    //gtk_container_add( GTK_CONTAINER(window), grid );
     gtk_container_add( GTK_CONTAINER(window), layout );
 
     gtk_grid_set_row_spacing( GTK_GRID(grid), 30 );
@@ -26,22 +27,18 @@ void board_init()
     gtk_grid_attach( GTK_GRID(grid), grid2, 0, 1, 1, 1 );
     gtk_grid_attach( GTK_GRID(grid), grid3, 0, 2, 1, 1 );
 
-    GdkPixbuf *background = gdk_pixbuf_new_from_file( "img/background.png", NULL );
+    struct ColorInfo *color = data;
+
+    const char* bg_names[] = { "img/default_bg.png", "img/blue_bg.png", "img/green_bg.png" };
+
+    GdkPixbuf *background = gdk_pixbuf_new_from_file( bg_names[color->color], NULL );
     gtk_layout_put( GTK_LAYOUT(layout), gtk_image_new_from_pixbuf(background), 0, 0 );
 
     gtk_layout_put( GTK_LAYOUT(layout), grid, 0, 0 );
 
     GdkPixbuf *Empty = gdk_pixbuf_new_from_file( "img/empty.png", NULL );
 
-    GdkPixbuf *One = gdk_pixbuf_new_from_file( "img/one.png", NULL );
-    GdkPixbuf *Two = gdk_pixbuf_new_from_file( "img/two.png", NULL );
-    GdkPixbuf *Three = gdk_pixbuf_new_from_file( "img/three.png", NULL );
-    GdkPixbuf *Four = gdk_pixbuf_new_from_file( "img/four.png", NULL );
-    GdkPixbuf *Five = gdk_pixbuf_new_from_file( "img/five.png", NULL );
-    GdkPixbuf *Six = gdk_pixbuf_new_from_file( "img/six.png", NULL );
-    GdkPixbuf *Seven = gdk_pixbuf_new_from_file( "img/seven.png", NULL );
-    GdkPixbuf *Eight = gdk_pixbuf_new_from_file( "img/eight.png", NULL );
-    GdkPixbuf *Nine = gdk_pixbuf_new_from_file( "img/nine.png", NULL );
+    const char* img_names[] = { "img/one.png", "img/two.png", "img/three.png", "img/four.png", "img/five.png", "img/six.png", "img/seven.png", "img/eight.png", "img/nine.png", };
 
     struct BoardInfo *board = (struct BoardInfo*)malloc(sizeof(struct BoardInfo));
     board->widget = NULL;
@@ -58,6 +55,13 @@ void board_init()
             arr[i][j]=0;
 
     board->arr = arr;
+
+    int **arr2 = (int**)malloc(9 * sizeof(int*));
+
+    for( int i=0; i<9; i++ )
+        arr2[i] = (int*)malloc(9 * sizeof(int));
+
+    board->arr2 = arr2;
 
     //FIRST GRID
 
@@ -83,16 +87,7 @@ void board_init()
     for( int i=0; i<9; i++ )
     {
 
-        GdkPixbuf *Number;
-        if( i == 0 )    Number = One;
-        else if( i == 1 )    Number = Two;
-        else if( i == 2 )    Number = Three;
-        else if( i == 3 )    Number = Four;
-        else if( i == 4 )    Number = Five;
-        else if( i == 5 )    Number = Six;
-        else if( i == 6 )    Number = Seven;
-        else if( i == 7 )    Number = Eight;
-        else if( i == 8 )    Number = Nine;
+        GdkPixbuf *Number = gdk_pixbuf_new_from_file( img_names[i], NULL );
 
         GtkWidget *image = gtk_image_new_from_pixbuf( Number );
         GtkWidget *button = gtk_button_new();
@@ -116,9 +111,24 @@ void board_init()
     g_signal_connect( G_OBJECT(check_button), "clicked", G_CALLBACK(press_check), board );
     gtk_grid_attach( GTK_GRID(grid3), check_button, 1, 0, 1, 1 );
 
+    GtkWidget *sudoku1 = gtk_button_new_with_label("EASY SUDOKU");
+
+    g_signal_connect( G_OBJECT(sudoku1), "clicked", G_CALLBACK(load_sudoku1), board );
+    gtk_grid_attach( GTK_GRID(grid3), sudoku1, 2, 0, 1, 1 );
+
+    GtkWidget *sudoku2 = gtk_button_new_with_label("MEDIUM SUDOKU");
+
+    g_signal_connect( G_OBJECT(sudoku2), "clicked", G_CALLBACK(load_sudoku2), board );
+    gtk_grid_attach( GTK_GRID(grid3), sudoku2, 3, 0, 1, 1 );
+
+    GtkWidget *sudoku3 = gtk_button_new_with_label("HARD SUDOKU");
+
+    g_signal_connect( G_OBJECT(sudoku3), "clicked", G_CALLBACK(load_sudoku3), board );
+    gtk_grid_attach( GTK_GRID(grid3), sudoku3, 4, 0, 1, 1 );
+
     //
 
-    g_signal_connect( G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL );
+    g_signal_connect( G_OBJECT(window), "destroy", G_CALLBACK(destroy_board), board );
 
     gtk_widget_show_all( window );
 

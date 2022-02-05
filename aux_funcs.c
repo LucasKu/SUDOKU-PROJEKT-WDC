@@ -34,3 +34,41 @@ struct WidPos get_number( GtkWidget *widget, struct BoardInfo *board )
     }
     return position;
 }
+
+bool check_if_sudoku( struct BoardInfo *board )
+{
+    for( int i=0; i<9; i++ )
+    {
+        for( int j=0; j<9; j++ )
+        {
+            if( board->arr2[i][j] != 0 && !is_safe2( board->arr2, i, j, board->arr2[i][j] ) )
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool check_if_correct( struct BoardInfo *board )
+{
+    for( int i=0; i<9; i++ )
+    {
+        for( int j=0; j<9; j++ )
+            if( board->arr[i][j] != board->arr2[i][j] )
+            {
+                return false;
+            }
+    }
+    return true;
+}
+
+void set_color( GtkWidget *widget, gpointer data )
+{
+    struct ColorInfo *color = data;
+
+    for( int i=0; i<3; i++ )
+        if( color->colors[i] == widget )
+            color->color = i;
+
+}

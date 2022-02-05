@@ -2,6 +2,7 @@
 #include<stdbool.h>
 #include<stdlib.h>
 #include "functions.h"
+#include<time.h>
 
 void click_on_board( GtkWidget *widget, gpointer data )
 {
@@ -34,29 +35,12 @@ void click_on_number( GtkWidget *widget, gpointer data )
 
     if( board->widget == NULL )    return;
 
-    GdkPixbuf *One = gdk_pixbuf_new_from_file( "img/one.png", NULL );
-    GdkPixbuf *Two = gdk_pixbuf_new_from_file( "img/two.png", NULL );
-    GdkPixbuf *Three = gdk_pixbuf_new_from_file( "img/three.png", NULL );
-    GdkPixbuf *Four = gdk_pixbuf_new_from_file( "img/four.png", NULL );
-    GdkPixbuf *Five = gdk_pixbuf_new_from_file( "img/five.png", NULL );
-    GdkPixbuf *Six = gdk_pixbuf_new_from_file( "img/six.png", NULL );
-    GdkPixbuf *Seven = gdk_pixbuf_new_from_file( "img/seven.png", NULL );
-    GdkPixbuf *Eight = gdk_pixbuf_new_from_file( "img/eight.png", NULL );
-    GdkPixbuf *Nine = gdk_pixbuf_new_from_file( "img/nine.png", NULL );
+    const char* img_names[] = { "img/one.png", "img/two.png", "img/three.png", "img/four.png", "img/five.png", "img/six.png", "img/seven.png", "img/eight.png", "img/nine.png", };
 
     struct WidPos position = get_number( widget, board );
     int i = position.x;
 
-    GdkPixbuf *Number;
-    if( i == 0 )    Number = One;
-    else if( i == 1 )    Number = Two;
-    else if( i == 2 )    Number = Three;
-    else if( i == 3 )    Number = Four;
-    else if( i == 4 )    Number = Five;
-    else if( i == 5 )    Number = Six;
-    else if( i == 6 )    Number = Seven;
-    else if( i == 7 )    Number = Eight;
-    else if( i == 8 )    Number = Nine;
+    GdkPixbuf *Number = gdk_pixbuf_new_from_file( img_names[i], NULL );
 
     struct WidPos pos_board = get_pos_on_board( board->widget, board );
     int x = pos_board.x;
@@ -75,32 +59,13 @@ void press_start( GtkWidget *widget, gpointer data )
 
     struct BoardInfo *board = data;
 
-    int **arr2 = (int**)malloc(9 * sizeof(int*));
+    board->start_t = clock();
 
-    for( int i=0; i<9; i++ )
-        arr2[i] = (int*)malloc(9 * sizeof(int));
     for( int i=0; i<9; i++ )
         for( int j=0; j<9; j++ )
-            arr2[i][j]=board->arr[i][j];
+            board->arr2[i][j]=board->arr[i][j];
 
-    board->arr2 = arr2;
-
-    bool is_sudoku = true;
-
-    for( int i=0; i<9; i++ )
-    {
-        if( is_sudoku == false )    break;
-        for( int j=0; j<9; j++ )
-        {
-            if( board->arr2[i][j] != 0 && !is_safe2( board->arr2, i, j, board->arr2[i][j] ) )
-            {
-                is_sudoku = false;
-                break;
-            }
-        }
-    }
-
-    if( !is_sudoku )
+    if( !check_if_sudoku(board) )
     {
 
         GtkWidget *new_window = gtk_window_new( GTK_WINDOW_TOPLEVEL );
@@ -128,23 +93,10 @@ void press_check( GtkWidget *widget, gpointer data )
 
     struct BoardInfo *board = data;
 
+    board->end_t = clock();
+
     if( board->start == false )    return;
     board->start = false;
-
-    bool is_corr = true;
-
-    for( int i=0; i<9; i++ )
-    {
-        if( is_corr == true )
-        {
-            for( int j=0; j<9; j++ )
-                if( board->arr[i][j] != board->arr2[i][j] )
-                {
-                    is_corr = false;
-                    break;
-                }
-        }
-    }
 
     g_print("Your solution:\n");
     for( int i=0; i<9; i++ )
@@ -169,6 +121,8 @@ void press_check( GtkWidget *widget, gpointer data )
     }
     g_print("\n");
 
+    bool is_corr = check_if_correct(board);
+
     if( is_corr )
     {
 
@@ -176,7 +130,8 @@ void press_check( GtkWidget *widget, gpointer data )
 
         gtk_window_set_position( GTK_WINDOW(new_window), GTK_WIN_POS_CENTER_ALWAYS );
         gtk_window_set_title( GTK_WINDOW(new_window), "RESULT" );
-        GtkWidget *label = gtk_label_new("CORRECT!\n");
+        GtkWidget *label = gtk_label_new("CORRECT!");
+        g_print("TIME (in seconds): %d\n", (int)((board->end_t - board->start_t)/CLOCKS_PER_SEC) );
         gtk_container_add( GTK_CONTAINER(new_window), label );
 
         gtk_widget_show_all(new_window);
@@ -197,4 +152,35 @@ void press_check( GtkWidget *widget, gpointer data )
 
     }
 
+}
+
+void destroy_board( GtkWidget *window, gpointer data )
+{
+    (void)window;
+
+    struct BoardInfo *board = data;
+    for( int i=0; i<9; i++ )
+    {
+        free(board->arr[i]);
+        free(board->arr2[i]);
+    }
+    free(board->arr);
+    free(board->arr2);
+    free(board);
+
+    return;
+}
+
+void destroy_menu( GtkWidget *window, gpointer data )
+{
+    (void)window;
+
+    struct ColorInfo *color = data;
+
+    free(color->colors);
+    free(color);
+
+    gtk_main_quit();
+
+    return;
 }
